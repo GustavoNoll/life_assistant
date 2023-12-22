@@ -22,7 +22,7 @@ exports.createTransaction = (req, res, next) => {
   .save()
   .then(transactionSaved => {
     res.status(201).json({
-      status: 200,
+      status: 'success',
       message: 'Transaction created successfully!',
       transaction: transactionSaved
     });
@@ -41,7 +41,10 @@ exports.deleteTransaction = (req, res, next) => {
         return res.status(404).json({ mensagem: 'Transação não encontrada' });
       }
       transaction.deleteOne().then(
-        () => {res.status(200).json({ mensagem: 'Transação removida com sucesso', transaction: transaction });}
+        () => {res.status(200).json({ 
+          status: 'success',
+          mensagem: 'Transação removida com sucesso',
+          transaction: transaction });}
       )
     })
   } catch (error) {
@@ -65,7 +68,8 @@ exports.createBank = (req, res, next) => {
   .then(bankSaved => {
     res.status(201).json({
       message: 'Bank created successfully!',
-      bank: bankSaved
+      bank: bankSaved,
+      status: 'success',
     });
   })
   .catch(err => res.status(500).json({err}));
@@ -77,12 +81,14 @@ exports.getBank = (req, res, next) => {
   const bankId = req.body.bankId;
   Bank.findById(bankId).then((bank) => {
     res.status(201).json({
+      status: 'success',
       message: 'Bank finded',
       bank: bank
     });
   })
   .catch((err) => {
     res.status(500).json({
+      status: 'error',
       message: err,
       bank: null
     });

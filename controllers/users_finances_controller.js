@@ -11,6 +11,7 @@ exports.getUserExpensesMonthly = (req, res, next) => {
   Transaction.searchByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear())
     .then((transactions) => {
       res.status(201).json({
+        status: 'success',
         message: 'Despesas no mes ' + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear()),
         transactions: transactions
       });
@@ -30,6 +31,7 @@ exports.getUserIncomesMonthly = (req, res, next) => {
   Transaction.searchByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear(), true)
     .then((transactions) => {
       res.status(201).json({
+        status: 'success',
         message: 'Receitas no mes ' + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear()),
         transactions: transactions
       });
@@ -49,6 +51,7 @@ exports.getUserWithdraw = (req, res, next) => {
   Transaction.withdrawByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear())
   .then((data) => {
     data["message"] = "Balanço em " + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear())
+    data["status"] = 'success'
     res.status(201).json(data);
   })
   .catch((error) => {
@@ -59,12 +62,14 @@ exports.getAllUserBanks = (req, res, next) => {
   const userId = req.query.userId;
   Bank.find({userId: userId}).then((banks) => {
     res.status(201).json({
+      status: 'success',
       message: 'Users banks finded',
       banks: banks
     });
   })
   .catch((err) => {
     res.status(500).json({
+      status: 'error',
       message: err,
       banks: null
     });

@@ -17,6 +17,7 @@ exports.createShipment  = (req, res, next) => {
           .then(user => {
             if (user) {
               return res.status(200).json({
+                status: 'success',
                 message: 'User already has this shipment. Ignoring duplicate.',
                 shipment: existingShipment,
                 api_request_status: 'ignored',
@@ -26,6 +27,7 @@ exports.createShipment  = (req, res, next) => {
               return User.findByIdAndUpdate(userId, { $push: { shipments: existingShipment._id } })
               .then(() => {
                 res.status(200).json({
+                  status: 'success',
                   message: 'Shipment with the same number already exists. Ignoring duplicate.',
                   shipment: existingShipment,
                   api_request_status: 'ignored',
@@ -51,11 +53,14 @@ exports.createShipment  = (req, res, next) => {
             request(options, function (error, response) {
               if (error) {
                 console.error('Erro na requisição da API:', error);
-                return res.status(500).json({ error: 'Error making API request.' });
+                return res.status(500).json({ 
+                  status: 'error',
+                  error: 'Error making API request.' });
               }
       
               if (response.body.includes('Too Many Requests')){
                 return res.status(201).json({
+                  status: 'success',
                   message: 'Shipment created successfully!',
                   shipment: shipmentSaved,
                   api_request_status: 'fail',
@@ -66,6 +71,7 @@ exports.createShipment  = (req, res, next) => {
                 .exec()
                 .then(result => {
                     res.status(201).json({
+                        status: 'success',
                         message: 'Shipment created successfully!',
                         shipment: shipmentSaved,
                         api_request_status: 'success'
@@ -117,6 +123,7 @@ exports.updateShipmentStatus = (req, res, next) => {
             .exec()
             .then(result => {
                 res.status(201).json({
+                    status: 'success',
                     message: 'Shipment updated successfully!',
                     shipment: shipment,
                     api_request_status: 'success'
@@ -145,6 +152,7 @@ exports.deleteShipment = (req, res, next) => {
       .then(shipment => {
         if (!shipment) {
           return res.status(404).json({
+            status: 'error',
             message: 'Shipment not found.',
           });
         }
@@ -155,6 +163,7 @@ exports.deleteShipment = (req, res, next) => {
       .then(user => {
         if (!user) {
           return res.status(404).json({
+            status: 'error',
             message: 'User not found.',
           });
         }
@@ -170,6 +179,7 @@ exports.deleteShipment = (req, res, next) => {
           return user.save();
         } else {
           return res.status(404).json({
+            status: 'error',
             message: 'Shipment not found in user\'s shipments.',
             user: user,
           });
@@ -178,6 +188,7 @@ exports.deleteShipment = (req, res, next) => {
       .then(updatedUser => {
         if (!res.headersSent) {
           return res.status(200).json({
+            status: 'success',
             message: 'Shipment removed from user successfully.',
             user: updatedUser,
           });
