@@ -98,9 +98,8 @@ transactionSchema.statics.searchByMonthYear = async function (user_id, month, ye
       userId: user_id,
       timestamp: { $gte: firstDay, $lte: lastDay },
       income: income
-    });
-    const helper = require('../helpers/transaction_helper');
-    return helper.groupByKind(transactions);
+    }).sort({ timestamp: -1 });
+    return transactions;
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
     throw error;

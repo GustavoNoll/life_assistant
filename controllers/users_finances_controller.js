@@ -4,16 +4,21 @@ const Transaction = require('../models/transaction');
 exports.getUserExpensesMonthly = (req, res, next) => {
   const date = req.query.date;
   const userId = req.query.userId;
+  const month = req.query.month;
+  const year = req.query.year;
+  const limit = req.query.limit || 50;
   let parsedDate = new Date();
   if (date){
     parsedDate = new Date(date)
   }
-  Transaction.searchByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear())
+  
+  Transaction.searchByMonthYear(userId, month || (parsedDate.getMonth() + 1),
+    year || parsedDate.getFullYear())
     .then((transactions) => {
       res.status(201).json({
         status: 'success',
         message: 'Despesas no mes ' + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear()),
-        transactions: transactions
+        transactions: transactions.slice(0,limit)
       });
     })
     .catch((error) => {
@@ -24,16 +29,20 @@ exports.getUserExpensesMonthly = (req, res, next) => {
 exports.getUserIncomesMonthly = (req, res, next) => {
   const date = req.query.date;
   const userId = req.query.userId;
+  const month = req.query.month;
+  const year = req.query.year;
+  const limit = req.query.limit || 50;
   let parsedDate = new Date();
   if (date){
     parsedDate = new Date(date)
   }
-  Transaction.searchByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear(), true)
+  Transaction.searchByMonthYear(userId, month || (parsedDate.getMonth() + 1),
+    year || parsedDate.getFullYear(), true)
     .then((transactions) => {
       res.status(201).json({
         status: 'success',
         message: 'Receitas no mes ' + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear()),
-        transactions: transactions
+        transactions: transactions.slice(0, limit)
       });
     })
     .catch((error) => {
@@ -44,13 +53,17 @@ exports.getUserIncomesMonthly = (req, res, next) => {
 exports.getUserWithdraw = (req, res, next) => {
   const date = req.query.date;
   const userId = req.query.userId;
+  const month = req.query.month;
+  const year = req.query.year;
+
   let parsedDate = new Date();
   if (date){
     parsedDate = new Date(date)
   }
-  Transaction.withdrawByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear())
+  Transaction.withdrawByMonthYear(userId, month || (parsedDate.getMonth() + 1),
+    year || parsedDate.getFullYear())
   .then((data) => {
-    data["message"] = "Balanço em " + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear())
+    data["message"] = "Balanço em " + (String(month || (parsedDate.getMonth() + 1))) + '/'+ String(year || parsedDate.getFullYear())
     data["status"] = 'success'
     res.status(201).json(data);
   })
