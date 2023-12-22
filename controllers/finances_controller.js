@@ -6,22 +6,23 @@ exports.createTransaction = (req, res, next) => {
   const value = req.body.value;
   const income = req.body.income;
   const kind = req.body.kind;
-  const user  = req.body.user;
-  const bank = req.body.bank;
-  const scheduledDate = req.body.scheduled_date;
+  const user  = req.body.userId;
+  const bank = req.body.bankId;
+  const scheduledDate = req.body.scheduledDate;
   const transaction = new Transaction({
     name: name,
     value: value,
     income: income,
     kind: kind,
-    user: user,
-    bank: bank,
+    userId: user,
+    bankId: bank,
     scheduledDate: scheduledDate,
   });
   transaction
   .save()
   .then(transactionSaved => {
     res.status(201).json({
+      status: 200,
       message: 'Transaction created successfully!',
       transaction: transactionSaved
     });
@@ -53,11 +54,11 @@ exports.deleteTransaction = (req, res, next) => {
 exports.createBank = (req, res, next) => {
   const name = req.body.name;
   const balance = req.body.balance;
-  const user = req.body.user;
+  const user = req.body.userId;
   const bank = new Bank({
     name: name,
     balance: balance,
-    user: user,
+    userId: user,
   });
   bank
   .save()

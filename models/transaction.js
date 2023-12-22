@@ -19,7 +19,7 @@ const transactionSchema = new Schema({
     type: String,
     required: true
   },
-  user: {
+  userId: {
     type: Schema.Types.ObjectId,
     ref: 'User',
     required: true
@@ -31,7 +31,7 @@ const transactionSchema = new Schema({
     type: Date,
     default: Date.now()
   },
-  bank: {
+  bankId: {
     type: Schema.Types.ObjectId,
     ref: 'Bank',
     required: true
@@ -46,7 +46,7 @@ transactionSchema.pre('save', async function (next) {
       const Bank = require('../models/bank'); // Certifique-se de ajustar o caminho conforme necessário
 
       // Recuperar o banco associado à transação
-      const bank = await Bank.findById(this.bank);
+      const bank = await Bank.findById(this.bankId);
 
       // Verificar se o banco existe
       if (bank) {
@@ -72,7 +72,7 @@ transactionSchema.pre('save', async function (next) {
 transactionSchema.pre('deleteOne', { document: true,query: false }, async function (next) {
   try {
     const Bank = require('../models/bank');
-    const banco = await Bank.findById(this.bank);
+    const banco = await Bank.findById(this.bankId);
     if (banco) {
       if (this.income) {
         banco.balance -= this.value;
@@ -89,13 +89,13 @@ transactionSchema.pre('deleteOne', { document: true,query: false }, async functi
   }
 });
 
-transactionSchema.statics.searchByMonthYear = async function (userId, month, year, income = false) {
+transactionSchema.statics.searchByMonthYear = async function (user_id, month, year, income = false) {
   try {
     const firstDay = new Date(year, month - 1, 1); // Mês é baseado em zero no JavaScript
     const lastDay = new Date(year, month, 0, 23, 59, 59); // Último dia do mês
 
     const transactions = await this.find({
-      user: userId,
+      userId: user_id,
       timestamp: { $gte: firstDay, $lte: lastDay },
       income: income
     });
@@ -107,18 +107,18 @@ transactionSchema.statics.searchByMonthYear = async function (userId, month, yea
   }
 };
 
-transactionSchema.statics.withdrawByMonthYear = async function (userId, month, year) {
+transactionSchema.statics.withdrawByMonthYear = async function (user_id, month, year) {
   try {
     const firstDay = new Date(year, month - 1, 1); // Mês é baseado em zero no JavaScript
     const lastDay = new Date(year, month, 0, 23, 59, 59); // Último dia do mês
 
     const incomes = await this.find({
-      user: userId,
+      userId: user_id,
       timestamp: { $gte: firstDay, $lte: lastDay },
       income: true
     });
     const expenses = await this.find({
-      user: userId,
+      userId: user_id,
       timestamp: { $gte: firstDay, $lte: lastDay },
       income: false
     });

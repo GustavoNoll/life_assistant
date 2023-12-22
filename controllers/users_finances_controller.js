@@ -2,8 +2,8 @@ const Bank = require('../models/bank');
 const Transaction = require('../models/transaction');
 
 exports.getUserExpensesMonthly = (req, res, next) => {
-  const date = req.date;
-  const userId = req.body.userId;
+  const date = req.query.date;
+  const userId = req.query.userId;
   let parsedDate = new Date();
   if (date){
     parsedDate = new Date(date)
@@ -21,8 +21,8 @@ exports.getUserExpensesMonthly = (req, res, next) => {
 }
 
 exports.getUserIncomesMonthly = (req, res, next) => {
-  const date = req.body.date;
-  const userId = req.body.userId;
+  const date = req.query.date;
+  const userId = req.query.userId;
   let parsedDate = new Date();
   if (date){
     parsedDate = new Date(date)
@@ -40,15 +40,15 @@ exports.getUserIncomesMonthly = (req, res, next) => {
 }
 
 exports.getUserWithdraw = (req, res, next) => {
-  const date = req.body.date;
-  const userId = req.body.userId;
+  const date = req.query.date;
+  const userId = req.query.userId;
   let parsedDate = new Date();
   if (date){
     parsedDate = new Date(date)
   }
   Transaction.withdrawByMonthYear(userId, parsedDate.getMonth() + 1, parsedDate.getFullYear())
   .then((data) => {
-    data["message"] = "Balanço do mes " + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear())
+    data["message"] = "Balanço em " + (String(parsedDate.getMonth() + 1)) + '/'+ String(parsedDate.getFullYear())
     res.status(201).json(data);
   })
   .catch((error) => {
@@ -56,8 +56,8 @@ exports.getUserWithdraw = (req, res, next) => {
   });
 }
 exports.getAllUserBanks = (req, res, next) => {
-  const userId = req.body.userId;
-  Bank.find({user: userId}).then((banks) => {
+  const userId = req.query.userId;
+  Bank.find({userId: userId}).then((banks) => {
     res.status(201).json({
       message: 'Users banks finded',
       banks: banks
