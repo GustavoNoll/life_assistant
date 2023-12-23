@@ -8,7 +8,6 @@ exports.createTransaction = (req, res, next) => {
   const kind = req.body.kind;
   const user  = req.body.userId;
   const bank = req.body.bankId;
-  const scheduledDate = req.body.scheduledDate;
   const transaction = new Transaction({
     name: name,
     value: value,
@@ -16,7 +15,7 @@ exports.createTransaction = (req, res, next) => {
     kind: kind,
     userId: user,
     bankId: bank,
-    scheduledDate: scheduledDate,
+    timestamp: new Date()
   });
   transaction
   .save()

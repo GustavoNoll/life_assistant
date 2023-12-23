@@ -15,4 +15,5 @@ router.get('/user_banks', userFinanceController.getAllUserBanks)
 router.get('/user_expenses', userFinanceController.getUserExpensesMonthly)
 router.get('/user_incomes', userFinanceController.getUserIncomesMonthly)
 router.get('/user_withdraw', userFinanceController.getUserWithdraw)
+router.get('/user_transactions', userFinanceController.getUserTransactions)
 module.exports = router;

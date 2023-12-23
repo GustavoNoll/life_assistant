@@ -24,9 +24,6 @@ const transactionSchema = new Schema({
     ref: 'User',
     required: true
   },
-  scheduledDate: {
-    type: Date
-  },
   timestamp: {
     type: Date,
     default: Date.now()
@@ -41,26 +38,24 @@ const transactionSchema = new Schema({
 transactionSchema.pre('save', async function (next) {
   try {
     const currentDate = new Date();
-    // Se a transação não está agendada, atualize o saldo do banco
-    if (!this.scheduledDate || this.scheduledDate <= currentDate) {
-      const Bank = require('../models/bank'); // Certifique-se de ajustar o caminho conforme necessário
+    const Bank = require('../models/bank'); // Certifique-se de ajustar o caminho conforme necessário
 
-      // Recuperar o banco associado à transação
-      const bank = await Bank.findById(this.bankId);
+    // Recuperar o banco associado à transação
+    const bank = await Bank.findById(this.bankId);
 
-      // Verificar se o banco existe
-      if (bank) {
-        // Atualizar o saldo com base no tipo de transação (income ou expense)
-        if (this.income) {
-          bank.balance += this.value;
-        }else{
-          bank.balance -= this.value;
-        }
-
-        // Salvar as alterações no banco
-        await bank.save();
+    // Verificar se o banco existe
+    if (bank) {
+      // Atualizar o saldo com base no tipo de transação (income ou expense)
+      if (this.income) {
+        bank.balance += this.value;
+      }else{
+        bank.balance -= this.value;
       }
+
+      // Salvar as alterações no banco
+      await bank.save();
     }
+    
 
     // Continue com a operação de salvamento da transação
     next();
@@ -100,6 +95,32 @@ transactionSchema.statics.searchByMonthYear = async function (user_id, month, ye
       income: income
     }).sort({ timestamp: -1 });
     return transactions;
+  } catch (error) {
+    console.error('Erro ao buscar transações:', error);
+    throw error;
+  }
+};
+
+transactionSchema.statics.userTransactions = async function (user_id, limit) {
+  try {
+    const transactions = await this.find({
+      userId: user_id,
+    }).sort({ timestamp: -1 }).limit(limit);
+
+    const formattedTransactions = transactions.map(transaction => {
+      const formattedTimestamp = new Date(transaction.timestamp).toLocaleString('pt-BR', {
+        day: '2-digit',
+        month: '2-digit',
+        year: 'numeric',
+      });
+
+      return {
+        ...transaction._doc,
+        timestamp: formattedTimestamp,
+      };
+    });
+
+    return formattedTransactions;
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
     throw error;

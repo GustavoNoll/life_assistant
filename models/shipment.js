@@ -3,20 +3,20 @@ const mongoose = require('mongoose');// import mongoose
 const Schema = mongoose.Schema;
 // create a new post schema
 const shipmentSchema = new Schema({
-  shipment_number: {
+  shipmentNumber: {
     type: String,
     required: true,
     unique: true
   },
   details: {
     type: mongoose.Schema.Types.Mixed,
-    default: {}
+    default: []
   }
 });
 
 shipmentSchema.pre('save', async function (next) {
   try {
-    this.shipment_number = this.shipment_number.toUpperCase();
+    this.shipmentNumber = this.shipmentNumber.toUpperCase();
     // Continue com a operação de salvamento da transação
     next();
   } catch (error) {
