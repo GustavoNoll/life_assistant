@@ -23,6 +23,5 @@ shipmentSchema.pre('save', async function (next) {
     next(error);
   }
 });
-shipmentSchema.statics.url = "http://websro.correios.com.br/sro_bin/txect01$.QueryList?P_ITEMCODE=&P_LINGUA=001&P_TESTE=&P_TIPO=001&P_COD_UNI="
 // export the model
 module.exports = mongoose.model('Shipment', shipmentSchema);

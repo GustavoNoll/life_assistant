@@ -50,7 +50,7 @@ exports.createShipment = async (req, res, next) => {
 
       const apiOptions = {
         method: 'GET',
-        url: `https://api.linketrack.com/track/json?user=teste&token=1abcd00b2731640e886fb41a8a9671ad1434c599dbaa0a0de9a5aa619f29a83f&codigo=${shipmentSaved.shipmentNumber}`,
+        url: `https://api.linketrack.com/track/json?user=gustavonoll78@gmail.com&token=c6f25096cf77608e913a7619335d1942c7784adb85ded9948328dd840bb882a8&codigo=${shipmentSaved.shipmentNumber}`,
         headers: {},
       };
 
@@ -91,7 +91,7 @@ exports.updateShipmentStatus = async (req, res, next) => {
 
   const apiOptions = {
     method: 'GET',
-    url: `https://api.linketrack.com/track/json?user=${user}&token=${token}&codigo=${shipmentNumber}`,
+    url: `https://api.linketrack.com/track/json?user=gustavonoll78@gmail.com&token=c6f25096cf77608e913a7619335d1942c7784adb85ded9948328dd840bb882a8&codigo=${shipmentNumber}`,
     headers: {},
   };
 
