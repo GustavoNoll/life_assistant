@@ -1,19 +1,22 @@
 const Bank = require('../models/bank');
 const Transaction = require('../models/transaction');
+const User = require('../models/user');
+const { validateUserId } = require('../validations/user_validation');
 //transaction
-exports.createTransaction = (req, res, next) => {
+exports.createTransaction = async (req, res, next) => {
   const name = req.body.name;
   const value = req.body.value;
   const income = req.body.income;
   const kind = req.body.kind;
-  const user  = req.body.userId;
+  const externalId  = req.body.userId;
   const bank = req.body.bankId;
+  const user = await User.findOne({ externalId: externalId });
   const transaction = new Transaction({
     name: name,
     value: value,
     income: income,
     kind: kind,
-    userId: user,
+    userId: user._id,
     bankId: bank,
     timestamp: new Date()
   });
@@ -53,25 +56,32 @@ exports.deleteTransaction = (req, res, next) => {
 };
 
 
-exports.createBank = (req, res, next) => {
+exports.createBank = async(req, res, next) => {
   const name = req.body.name;
   const balance = req.body.balance;
-  const user = req.body.userId;
-  const bank = new Bank({
-    name: name,
-    balance: balance,
-    userId: user,
-  });
-  bank
-  .save()
-  .then(bankSaved => {
-    res.status(201).json({
-      message: 'Bank created successfully!',
-      bank: bankSaved,
-      status: 'success',
+  const externalId = req.body.userId;
+  try {
+    await validateUserId(externalId);
+    const user = await User.findOne({ externalId: externalId });
+    const bank = new Bank({
+      name: name,
+      balance: balance,
+      userId: user._id,
     });
-  })
-  .catch(err => res.status(500).json({err}));
+    bank
+    .save()
+    .then(bankSaved => {
+      res.status(201).json({
+        message: 'Bank created successfully!',
+        bank: bankSaved,
+        status: 'success',
+      });
+    })
+    .catch(err => res.status(500).json({err}));
+  }catch(error) {
+    console.log(error)
+    res.status(500).json({ error: error.message });
+  }
 }
 
 

@@ -5,8 +5,22 @@ const { validateShipmentNumber } = require('../validations/shipment_validation')
 const { validateUserId } = require('../validations/user_validation');
 const { makeApiRequest } = require('../utils/api_request');
 
-const addShipmentToUser = (userId, shipmentId) => {
-  return User.findByIdAndUpdate(userId, { $push: { shipments: shipmentId } });
+const addShipmentToUser = async (userId, shipmentId) => {
+  try {
+    const existingUser = await User.findOne({ externalId: userId });
+
+    if (existingUser) {
+      await existingUser.updateOne({ $push: { shipments: shipmentId } });
+    } else {
+      const newUser = new User({
+        externalId: userId,
+        shipments: [shipmentId],
+      });
+      await newUser.save();
+    }
+  } catch (error) {
+    throw new Error('Erro durante a operação: ' + error.message);
+  }
 };
 
 const updateShipmentDetails = (shipmentId, eventos) => {
@@ -16,6 +30,7 @@ const updateShipmentDetails = (shipmentId, eventos) => {
 exports.createShipment = async (req, res, next) => {
   const shipmentNumber = req.body.shipmentNumber.toUpperCase();
   const userId = req.body.userId;
+  console.log(req)
 
   try {
     validateShipmentNumber(shipmentNumber);
@@ -24,7 +39,7 @@ exports.createShipment = async (req, res, next) => {
     const existingShipment = await Shipment.findOne({ shipmentNumber: shipmentNumber });
 
     if (existingShipment) {
-      const user = await User.findOne({ _id: userId, shipments: existingShipment._id });
+      const user = await User.findOne({ externalId: userId, shipments: existingShipment._id });
 
       if (user) {
         return res.status(200).json({
@@ -86,8 +101,6 @@ exports.createShipment = async (req, res, next) => {
 
 exports.updateShipmentStatus = async (req, res, next) => {
   const shipmentNumber = req.body.shipmentNumber.toUpperCase();
-  const user = 'teste';
-  const token = '1abcd00b2731640e886fb41a8a9671ad1434c599dbaa0a0de9a5aa619f29a83f';
 
   const apiOptions = {
     method: 'GET',
@@ -175,7 +188,7 @@ exports.getUserShipments = async (req, res, next) => {
   try {
     validateUserId(userId);
 
-    const user = await User.findOne({ _id: userId }).exec();
+    const user = await User.findOne({ externalId: userId }).exec();
 
     if (!user) {
       return res.status(404).json({
