@@ -7,13 +7,14 @@ const { validateUserId } = require('../validations/user_validation');
 
 exports.getUserTransactions = async (req, res, next) => {
   const externalId = req.query.userId;
-  const limit = req.query.limit || 50;
+  const month = req.query.month;
+  const year = req.query.year;
 
   try {
     await validateUserId(externalId);
     const user = await User.findOne({ externalId: externalId });
 
-    const transactions = await Transaction.userTransactions(user._id,limit);
+    const transactions = await Transaction.userTransactions(user._id,month, year);
     res.status(201).json({
       status: 'success',
       message: `Transações`,
@@ -21,7 +22,7 @@ exports.getUserTransactions = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -45,7 +46,7 @@ exports.getUserExpensesMonthly = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -68,7 +69,7 @@ exports.getUserIncomesMonthly = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -89,7 +90,7 @@ exports.getUserWithdraw = async (req, res, next) => {
     res.status(201).json(data);
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -108,6 +109,6 @@ exports.getAllUserBanks = async (req, res, next) => {
     });
   } catch (error) {
     console.error('Erro ao buscar bancos do usuário:', error);
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };

@@ -92,8 +92,8 @@ exports.createShipment = async (req, res, next) => {
     }
   } catch (error) {
     return res.status(400).json({
+      status: 'error',
       message: error.message,
-      shipment: null,
       apiRequestStatus: 'ignored',
     });
   }
@@ -130,7 +130,10 @@ exports.updateShipmentStatus = async (req, res, next) => {
       apiRequestStatus: 'success',
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(500).json({ 
+      status: 'error',
+      message: err.message 
+    });
   }
 };
 
@@ -177,7 +180,10 @@ exports.deleteShipment = async (req, res, next) => {
       message: 'Shipment removed from user successfully.',
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(500).json({ 
+      status: 'error',
+      message: err.message,
+    });
   }
 };
 
@@ -209,6 +215,9 @@ exports.getUserShipments = async (req, res, next) => {
       userShipments: userShipments,
     });
   } catch (err) {
-    res.status(500).json({ err });
+    res.status(500).json({ 
+      status: 'error',
+      message: err.message,
+    });
   }
 };

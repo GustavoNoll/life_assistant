@@ -29,15 +29,14 @@ exports.createTransaction = async (req, res, next) => {
       transaction: transactionSaved
     });
   })
-  .catch(err => res.status(500).json({err}));
+  .catch(err => res.status(500).json({status: 'error', message: err.message}));
 }
 
 exports.deleteTransaction = (req, res, next) => {
   try {
-    const transactionId = req.body.transaction_id;
-
+    const transactionId = req.query.transactionId;
     // Encontre e remova a transação por ID
-    Transaction.findOne({_id: transactionId})
+    Transaction.findById(transactionId)
     .then((transaction) => {
       if (!transaction) {
         return res.status(404).json({ mensagem: 'Transação não encontrada' });
@@ -45,13 +44,11 @@ exports.deleteTransaction = (req, res, next) => {
       transaction.deleteOne().then(
         () => {res.status(200).json({ 
           status: 'success',
-          mensagem: 'Transação removida com sucesso',
-          transaction: transaction });}
+          message: 'Transação removida com sucesso',});}
       )
     })
   } catch (error) {
-    console.error('Erro ao remover transação:', error);
-    res.status(500).json({ mensagem: 'Erro interno do servidor' });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 };
 
@@ -79,8 +76,7 @@ exports.createBank = async(req, res, next) => {
     })
     .catch(err => res.status(500).json({err}));
   }catch(error) {
-    console.log(error)
-    res.status(500).json({ error: error.message });
+    res.status(500).json({ status: 'error', message: error.message });
   }
 }
 
@@ -98,8 +94,7 @@ exports.getBank = (req, res, next) => {
   .catch((err) => {
     res.status(500).json({
       status: 'error',
-      message: err,
-      bank: null
+      message: err.menssage,
     });
   });
 }

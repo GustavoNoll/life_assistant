@@ -101,11 +101,15 @@ transactionSchema.statics.searchByMonthYear = async function (user_id, month, ye
   }
 };
 
-transactionSchema.statics.userTransactions = async function (user_id, limit) {
+transactionSchema.statics.userTransactions = async function (user_id, month, year) {
   try {
+    const parsedDate = new Date();
+    const firstDay = new Date(year || parsedDate.getFullYear(), (month - 1) || parsedDate.getMonth(), 1);
+    const lastDay = new Date(year || parsedDate.getFullYear(), (month) || (parsedDate.getMonth() + 1), 0, 23, 59, 59);
     const transactions = await this.find({
       userId: user_id,
-    }).sort({ timestamp: -1 }).limit(limit);
+      timestamp: { $gte: firstDay, $lte: lastDay }
+    }).sort({ timestamp: -1 });
 
     const formattedTransactions = transactions.map(transaction => {
       const formattedTimestamp = new Date(transaction.timestamp).toLocaleString('pt-BR', {
