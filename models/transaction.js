@@ -33,6 +33,26 @@ const transactionSchema = new Schema({
     ref: 'Bank',
     required: true
   },
+  isParcel: {
+    type: Boolean,
+    default: false,
+  },
+  currentParcel: {
+    type: Number,
+    default: 1,
+  },
+  parcelId: {
+    type: Schema.Types.ObjectId,
+    ref: 'Transaction',
+  },
+  scheduledDate: {
+    type: Date,
+    default: new Date(),
+  },
+  isPaid: {
+    type: Boolean,
+    default: false,
+  },
 });
 
 transactionSchema.pre('save', async function (next) {
@@ -44,7 +64,7 @@ transactionSchema.pre('save', async function (next) {
     const bank = await Bank.findById(this.bankId);
 
     // Verificar se o banco existe
-    if (bank) {
+    if (bank && this.isPaid) {
       // Atualizar o saldo com base no tipo de transação (income ou expense)
       if (this.income) {
         bank.balance += this.value;
@@ -68,7 +88,7 @@ transactionSchema.pre('deleteOne', { document: true,query: false }, async functi
   try {
     const Bank = require('../models/bank');
     const banco = await Bank.findById(this.bankId);
-    if (banco) {
+    if (banco && this.isPaid) {
       if (this.income) {
         banco.balance -= this.value;
       } else {
@@ -91,7 +111,7 @@ transactionSchema.statics.searchByMonthYear = async function (user_id, month, ye
 
     const transactions = await this.find({
       userId: user_id,
-      timestamp: { $gte: firstDay, $lte: lastDay },
+      scheduledDate: { $gte: firstDay, $lte: lastDay },
       income: income
     }).sort({ timestamp: -1 });
     return transactions;
@@ -103,16 +123,25 @@ transactionSchema.statics.searchByMonthYear = async function (user_id, month, ye
 
 transactionSchema.statics.userTransactions = async function (user_id, month, year) {
   try {
-    const parsedDate = new Date();
-    const firstDay = new Date(year || parsedDate.getFullYear(), (month - 1) || parsedDate.getMonth(), 1);
-    const lastDay = new Date(year || parsedDate.getFullYear(), (month) || (parsedDate.getMonth() + 1), 0, 23, 59, 59);
+    let firstDay, lastDay
+    if (month && year) {
+      firstDay = new Date(year , (month - 1), 1);
+      lastDay = new Date(year , (month), 0, 23, 59, 59);
+    }else {
+      const currentDate = new Date();
+      firstDay = new Date(currentDate.getFullYear() , currentDate.getMonth(), 1);
+      lastDay = new Date(currentDate.getFullYear() , (currentDate.getMonth() + 1), 0, 23, 59, 59);
+    }
+  
     const transactions = await this.find({
       userId: user_id,
-      timestamp: { $gte: firstDay, $lte: lastDay }
+      scheduledDate: { $gte: firstDay, $lte: lastDay },
     }).sort({ timestamp: -1 });
 
     const formattedTransactions = transactions.map(transaction => {
-      const formattedTimestamp = new Date(transaction.timestamp).toLocaleString('pt-BR', {
+      const scheduledDate = transaction.scheduledDate
+      console.log(scheduledDate);
+      const formattedTimestamp = scheduledDate.toLocaleString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
         year: 'numeric',
@@ -120,7 +149,7 @@ transactionSchema.statics.userTransactions = async function (user_id, month, yea
 
       return {
         ...transaction._doc,
-        timestamp: formattedTimestamp,
+        scheduledDate: formattedTimestamp,
       };
     });
 
@@ -138,13 +167,15 @@ transactionSchema.statics.withdrawByMonthYear = async function (user_id, month, 
 
     const incomes = await this.find({
       userId: user_id,
-      timestamp: { $gte: firstDay, $lte: lastDay },
-      income: true
+      scheduledDate: { $gte: firstDay, $lte: lastDay },
+      income: true,
+      isPaid: true
     });
     const expenses = await this.find({
       userId: user_id,
-      timestamp: { $gte: firstDay, $lte: lastDay },
-      income: false
+      scheduledDate: { $gte: firstDay, $lte: lastDay },
+      income: false,
+      isPaid: true
     });
 
     const incomesSum = incomes.reduce((sum, transaction) => {
@@ -156,7 +187,7 @@ transactionSchema.statics.withdrawByMonthYear = async function (user_id, month, 
     }, 0);
     
     const withdraw = incomesSum + expensesSum;
-    return {incomes: incomesSum, expenses: expensesSum, withdraw: withdraw}
+    return {incomes: incomesSum, expenses: expensesSum, withdraw: withdraw} //nextincomes next expenses next withdraw
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
     throw error;

@@ -30,7 +30,6 @@ const updateShipmentDetails = (shipmentId, eventos) => {
 exports.createShipment = async (req, res, next) => {
   const shipmentNumber = req.body.shipmentNumber.toUpperCase();
   const userId = req.body.userId;
-  console.log(req)
 
   try {
     validateShipmentNumber(shipmentNumber);

@@ -5,6 +5,7 @@ const router = express.Router();
 
 router.post('/transactions', financesController.createTransaction);
 router.delete('/transactions', financesController.deleteTransaction);
+router.patch('/transactions/confirm_pay', financesController.confirmPay);
 
 
 
