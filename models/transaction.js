@@ -55,6 +55,8 @@ const transactionSchema = new Schema({
   },
 });
 
+const { getTransactions, calculateSum } = require('../helpers/transaction_helper');
+
 transactionSchema.pre('save', async function (next) {
   try {
     const currentDate = new Date();
@@ -140,7 +142,6 @@ transactionSchema.statics.userTransactions = async function (user_id, month, yea
 
     const formattedTransactions = transactions.map(transaction => {
       const scheduledDate = transaction.scheduledDate
-      console.log(scheduledDate);
       const formattedTimestamp = scheduledDate.toLocaleString('pt-BR', {
         day: '2-digit',
         month: '2-digit',
@@ -177,17 +178,32 @@ transactionSchema.statics.withdrawByMonthYear = async function (user_id, month, 
       income: false,
       isPaid: true
     });
+    const scheduledExpenses = await this.find({
+      userId: user_id,
+      scheduledDate: { $gte: firstDay, $lte: lastDay },
+      income: false,
+      isPaid: false
+    });
+    const scheduledIncomes = await this.find({
+      userId: user_id,
+      scheduledDate: { $gte: firstDay, $lte: lastDay },
+      income: true,
+      isPaid: false,
+    });
 
-    const incomesSum = incomes.reduce((sum, transaction) => {
-      return sum + transaction.value;
-    }, 0);
-
-    const expensesSum = expenses.reduce((sum, transaction) => {
-      return sum - transaction.value;
-    }, 0);
+    const incomesSum = calculateSum(incomes);
+    const expensesSum = calculateSum(expenses);
+    const scheduledExpensesSum = calculateSum(scheduledExpenses);
+    const scheduledIncomesSum = calculateSum(scheduledIncomes);
     
     const withdraw = incomesSum + expensesSum;
-    return {incomes: incomesSum, expenses: expensesSum, withdraw: withdraw} //nextincomes next expenses next withdraw
+    return {
+      scheduledIncomes: scheduledIncomesSum,
+      incomes: incomesSum,
+      scheduledExpenses: scheduledExpensesSum,
+      expenses: expensesSum,
+      withdraw: withdraw
+    }
   } catch (error) {
     console.error('Erro ao buscar transações:', error);
     throw error;

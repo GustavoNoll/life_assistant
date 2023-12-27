@@ -64,7 +64,6 @@ exports.createTransaction = async (req, res, next) => {
         scheduledDate: scheduledDate,
         isPaid: isPaid,
       });
-      console.log(scheduledDate)
       await transaction.save();
 
       res.status(201).json({

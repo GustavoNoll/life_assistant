@@ -10,7 +10,11 @@ function groupByKind(transactions) {
     return grouped;
   }, {});
 }
+function calculateSum(transactions) {
+  return transactions.reduce((sum, transaction) => sum + transaction.value, 0);
+}
 
 module.exports = {
   groupByKind,
+  calculateSum,
 };
