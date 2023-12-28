@@ -196,7 +196,7 @@ transactionSchema.statics.withdrawByMonthYear = async function (user_id, month, 
     const scheduledExpensesSum = calculateSum(scheduledExpenses);
     const scheduledIncomesSum = calculateSum(scheduledIncomes);
     
-    const withdraw = incomesSum + expensesSum;
+    const withdraw = incomesSum - expensesSum;
     return {
       scheduledIncomes: scheduledIncomesSum,
       incomes: incomesSum,
